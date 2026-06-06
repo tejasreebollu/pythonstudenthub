@@ -1,81 +1,97 @@
 pipeline {
-agent any
+    agent any
 
-```
-environment {
-    DOCKER_IMAGE = "chinninaidu/studenthub-app"
-    DOCKER_TAG = "latest"
-}
-
-stages {
-
-    stage('Checkout Code') {
-        steps {
-            git branch: 'main',
-            url: 'https://github.com/aegletek/StudentHub.git'
-        }
+    environment {
+        DOCKER_IMAGE = "chinninaidu/studenthub-app"
+        DOCKER_TAG = "latest"
+        KUBECONFIG = "/var/lib/jenkins/.kube/config"
     }
 
-    stage('Verify Files') {
-        steps {
-            sh '''
-            pwd
-            ls -la
-            '''
-        }
-    }
+    stages {
 
-    stage('Build Docker Image') {
-        steps {
-            sh '''
-            docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} .
-            '''
+        stage('Checkout Code') {
+            steps {
+                git branch: 'main', url: 'https://github.com/aegletek/StudentHub.git'
+            }
         }
-    }
 
-    stage('Docker Login') {
-        steps {
-            withCredentials([
-                usernamePassword(
-                    credentialsId: 'dockerhub',
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASS'
-                )
-            ]) {
+        stage('Verify Files') {
+            steps {
                 sh '''
-                echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                pwd
+                ls -la
+                '''
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                sh '''
+                echo "Installing dependencies..."
+                # pip install -r requirements.txt
+                # npm install
+                '''
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                sh '''
+                echo "Running tests..."
+                # pytest
+                # npm test
+                '''
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh '''
+                echo "Building Docker image..."
+                docker build -t $DOCKER_IMAGE:$DOCKER_TAG .
+                '''
+            }
+        }
+
+        stage('Login to DockerHub') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-cred',
+                                                  usernameVariable: 'DOCKER_USER',
+                                                  passwordVariable: 'DOCKER_PASS')]) {
+                    sh '''
+                    echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                    '''
+                }
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                sh '''
+                docker push $DOCKER_IMAGE:$DOCKER_TAG
+                '''
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                sh '''
+                kubectl apply -f k8s/
+                kubectl get pods
+                kubectl get svc
                 '''
             }
         }
     }
 
-    stage('Push Docker Image') {
-        steps {
-            sh '''
-            docker push ${DOCKER_IMAGE}:${DOCKER_TAG}
-            '''
+    post {
+        success {
+            echo "PIPELINE SUCCESS 🚀 Deployment completed"
+        }
+
+        failure {
+            echo "PIPELINE FAILED ❌ Check logs"
         }
     }
-
-    stage('Verify Image') {
-        steps {
-            sh '''
-            docker images | grep studenthub-app
-            '''
-        }
-    }
-}
-
-post {
-    success {
-        echo 'StudentHub Docker image pushed successfully'
-    }
-
-    failure {
-        echo 'Pipeline failed'
-    }
-}
-```
-
 }
 
