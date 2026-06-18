@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "chinninaidu/studenthub-app"
+        DOCKER_IMAGE = "yashuraj/myhub"
         DOCKER_TAG = "latest"
         KUBECONFIG = "/var/lib/jenkins/.kube/config"
     }
