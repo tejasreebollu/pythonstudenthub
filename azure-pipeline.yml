@@ -10,13 +10,13 @@ variables:
   tag: '$(Build.BuildId)'
 
   # Service Connections
-  acrServiceConnection: 'rgconnection'
-  azureSubscription: 'tejupythonconnection'
+  acrServiceConnection: 'drconnection'
+  azureSubscription: 'rgconnection'
 
   # Azure Resources
-  containerRegistry: 'pythonacr1.azurecr.io'
-  aksResourceGroup: 'tejupython-rg'
-  aksCluster: 'pythonaks1'
+  containerRegistry: 'rojaacr.azurecr.io'
+  aksResourceGroup: 'roja-rg'
+  aksCluster: 'aks-studenthub'
 
 stages:
 
