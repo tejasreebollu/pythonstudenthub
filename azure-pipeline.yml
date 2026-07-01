@@ -11,8 +11,8 @@ variables:
   tag: '$(Build.BuildId)'
 
   # Azure DevOps Service Connections
-  acrServiceConnection: 'YOUR-ACR-SERVICE-CONNECTION'
-  azureSubscription: 'YOUR-AZURE-SERVICE-CONNECTION'
+  acrServiceConnection: 'rgconnection'
+  azureSubscription: 'tejupythonconnection'
 
   # Azure Resources
   containerRegistry: 'tejupythonacr.azurecr.io'
