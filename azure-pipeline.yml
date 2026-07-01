@@ -1,4 +1,3 @@
-
 trigger:
 - main
 
@@ -10,35 +9,32 @@ variables:
   dockerfilePath: 'Dockerfile'
   tag: '$(Build.BuildId)'
 
-  # Azure DevOps Service Connections
+  # Service Connections
   acrServiceConnection: 'rgconnection'
   azureSubscription: 'tejupythonconnection'
 
   # Azure Resources
   containerRegistry: 'tejupythonacr.azurecr.io'
   aksResourceGroup: 'tejupython-rg'
-  aksCluster: 'pythonacr1'
+  aksCluster: 'pythonaks1'
 
 stages:
 
-#==========================================
+# ============================
 # Build Stage
-#==========================================
+# ============================
 
 - stage: Build
   displayName: Build and Push Docker Image
 
   jobs:
-
   - job: DockerBuild
-
     steps:
 
     - checkout: self
 
     - task: Docker@2
       displayName: Build and Push Docker Image
-
       inputs:
         command: buildAndPush
         repository: $(imageRepository)
@@ -48,28 +44,25 @@ stages:
           $(tag)
           latest
 
-#==========================================
+# ============================
 # Deploy Stage
-#==========================================
+# ============================
 
 - stage: Deploy
   displayName: Deploy to AKS
-
   dependsOn: Build
 
   jobs:
-
   - job: AKSDeploy
-
     steps:
 
     - checkout: self
 
     - task: KubernetesManifest@1
       displayName: Deploy Application
-
       inputs:
         action: deploy
+        connectionType: 'azureResourceManager'
         azureSubscriptionConnection: $(azureSubscription)
         azureResourceGroup: $(aksResourceGroup)
         kubernetesCluster: $(aksCluster)
