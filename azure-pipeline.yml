@@ -14,7 +14,7 @@ variables:
   azureSubscription: 'tejupythonconnection'
 
   # Azure Resources
-  containerRegistry: 'tejupythonacr.azurecr.io'
+  containerRegistry: 'pythonacr1.azurecr.io'
   aksResourceGroup: 'tejupython-rg'
   aksCluster: 'pythonaks1'
 
