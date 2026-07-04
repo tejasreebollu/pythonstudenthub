@@ -10,13 +10,13 @@ variables:
   tag: '$(Build.BuildId)'
 
   # Service Connections
-  acrServiceConnection: 'dgconnections'
-  azureSubscription: 'rgconnections'
+  acrServiceConnection: 'dr-connection'
+  azureSubscription: 'azure subscription 1'
 
   # Azure Resources
-  containerRegistry: 'pythonhub.azurecr.io'
-  aksResourceGroup: 'pythonhubrg'
-  aksCluster: 'aks-python'
+  containerRegistry: 'studentrn.azurecr.io'
+  aksResourceGroup: 'rg-student'
+  aksCluster: 'aks-pythonstudenthub'
 
 stages:
 
