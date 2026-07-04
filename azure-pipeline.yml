@@ -11,7 +11,7 @@ variables:
 
   # Service Connections
   acrServiceConnection: 'dr-connection'
-  azureSubscription: 'azure subscription 1'
+  azureSubscription: 'rm-connection'
 
   # Azure Resources
   containerRegistry: 'studentrn.azurecr.io'
