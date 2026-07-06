@@ -1,3 +1,4 @@
+
 trigger:
 - main
 
@@ -6,29 +7,30 @@ pool:
 
 variables:
   imageRepository: 'studenthub'
+  containerRegistry: 'pythonlask.azurecr.io'
   dockerfilePath: 'Dockerfile'
   tag: '$(Build.BuildId)'
 
   # Service Connections
-  acrServiceConnection: 'dr-connection'
+  dockerRegistryServiceConnection: 'dr-connection'
   azureSubscription: 'rm-connection'
 
-  # Azure Resources
-  containerRegistry: 'studentrn.azurecr.io'
-  aksResourceGroup: 'rg-student'
-  aksCluster: 'aks-pythonstudenthub'
+  # AKS
+  aksResourceGroup: 'pythonflask-rg'
+  aksClusterName: 'aks-pythonflask'
 
 stages:
 
 # ============================
-# Build Stage
+# Build & Push Docker Image
 # ============================
-
 - stage: Build
-  displayName: Build and Push Docker Image
+  displayName: Build and Push Image
 
   jobs:
-  - job: DockerBuild
+  - job: BuildPush
+    displayName: Build Docker Image
+
     steps:
 
     - checkout: self
@@ -39,38 +41,43 @@ stages:
         command: buildAndPush
         repository: $(imageRepository)
         dockerfile: $(dockerfilePath)
-        containerRegistry: $(acrServiceConnection)
+        containerRegistry: $(dockerRegistryServiceConnection)
         tags: |
           $(tag)
           latest
 
 # ============================
-# Deploy Stage
+# Deploy to AKS
 # ============================
-
 - stage: Deploy
   displayName: Deploy to AKS
+
   dependsOn: Build
 
   jobs:
-  - job: AKSDeploy
+  - job: DeployAKS
+    displayName: Deploy Application
+
     steps:
 
-    - checkout: self
-
-    - task: KubernetesManifest@1
-      displayName: Deploy Application
+    - task: AzureCLI@2
+      displayName: Get AKS Credentials
       inputs:
-        action: deploy
-        connectionType: 'azureResourceManager'
-        azureSubscriptionConnection: $(azureSubscription)
-        azureResourceGroup: $(aksResourceGroup)
-        kubernetesCluster: $(aksCluster)
-        namespace: default
+        azureSubscription: $(azureSubscription)
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          az aks get-credentials \
+            --resource-group $(aksResourceGroup) \
+            --name $(aksClusterName) \
+            --overwrite-existing
 
-        manifests: |
+    - task: Kubernetes@1
+      displayName: Deploy to AKS
+      inputs:
+        connectionType: 'None'
+        command: apply
+        useConfigurationFile: true
+        configuration: |
           k8s/deployment.yaml
           k8s/service.yaml
-
-        containers: |
-          $(containerRegistry)/$(imageRepository):$(tag)
