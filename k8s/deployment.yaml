@@ -39,7 +39,7 @@ spec:
     spec:
       containers:
       - name: studenthub
-        image: studentrn.azurecr.io/studenthub:latest
+        image: pythonlask.azurecr.io/studenthub:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 8000
